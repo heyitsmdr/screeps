@@ -26,8 +26,8 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-        name: install deps
+      - name: install deps
+#       if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
         run: npm install
 
       - name: push

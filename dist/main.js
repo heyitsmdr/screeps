@@ -9,8 +9,7 @@ module.exports = {
     helper.ensureCreepMinimum(roleTypes.HARVESTER, 2);
     helper.ensureCreepMinimum(roleTypes.UPGRADER, 2);
 
-    // TODO: Remove passing in a spawn; make function loop through all spawns.
-    vfx.displaySpawnIndicator('MainSpawn');
+    vfx.displaySpawnIndicator();
 
     helper.performCreepRoles();
   }

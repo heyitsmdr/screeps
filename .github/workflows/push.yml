@@ -12,23 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: cache node_modules
-        id: cache-npm
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-node-modules
+      - uses: actions/setup-node@v3
         with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-
-      - name: install deps
-#       if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-        run: npm install
+          node-version: 16
+          cache: 'npm'
 
       - name: write screeps config
         env:
@@ -44,10 +31,7 @@ jobs:
               \"path\": \"/\",
               \"branch\": \"test\"
             }
-          }' > screeps.json
+          }" > screeps.json
 
       - name: push
         run: npm run push-main
-        env:
-          SCREEPS_EMAIL: ${{ secrets.SCREEPS_EMAIL }}
-          SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}

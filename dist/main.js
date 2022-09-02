@@ -10,8 +10,6 @@ module.exports = {
     helper.ensureCreepMinimum(roleTypes.BASIC, 4);
 
     vfx.displaySpawnIndicator();
-
-    helper.performCreepRoles();
     
     for (const creepName in Game.creeps) {
       const creep = Game.creeps[creepName];

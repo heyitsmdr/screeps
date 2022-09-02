@@ -17,6 +17,9 @@ jobs:
           node-version: 16
           cache: 'npm'
 
+      - name: push
+        run: npm install
+
       - name: write screeps config
         env:
           SCREEPS_EMAIL: ${{ secrets.SCREEPS_EMAIL }}

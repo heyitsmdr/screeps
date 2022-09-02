@@ -30,8 +30,24 @@ jobs:
 #       if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
         run: npm install
 
+      - name: write screeps config
+        env:
+          SCREEPS_EMAIL: ${{ secrets.SCREEPS_EMAIL }}
+          SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
+        run: |-
+          echo "{
+            \"main\": {
+              \"token\": \"$SCREEPS_TOKEN\",
+              \"protocol\": \"https\",
+              \"hostname\": \"screeps.com\",
+              \"port\": 443,
+              \"path\": \"/\",
+              \"branch\": \"test\"
+            }
+          }' > screeps.json
+
       - name: push
-        run: npm run push
+        run: npm run push-main
         env:
           SCREEPS_EMAIL: ${{ secrets.SCREEPS_EMAIL }}
           SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}

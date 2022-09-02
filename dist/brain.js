@@ -1,5 +1,7 @@
 // Creep brain.
 
-export function think() {
-  
-}
+module.exports = {
+  think: function() {
+    
+  }
+};

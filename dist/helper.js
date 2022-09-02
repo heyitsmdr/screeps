@@ -14,12 +14,12 @@ module.exports = {
   },
 
   ensureCreepMinimum: function (role, minCreeps) {
-    const parts = [WORK, CARRY, MOVE];
+    const partsForRole = roleTypes.BODY_PARTS[role];
     const creepsOfType = _.filter(Game.creeps, (creep) => creep.memory.role === role);
     if (creepsOfType.length < minCreeps) {
       const creepName = role.substr(0, 1).toUpperCase() + role.substr(1) + Game.time;
       const spawnResult = Game.spawns['MainSpawn'].spawnCreep(
-        parts,
+        partsForRole,
         creepName,
         {
           memory: {
@@ -28,7 +28,7 @@ module.exports = {
         }
       );
       if (spawnResult === OK) {
-        console.log(`Spawning creep (name: ${creepName}, role: ${role}, cost: ${this.calculateCost(parts)})`);
+        console.log(`Spawning creep (name: ${creepName}, role: ${role}, parts: ${partsForRole}, cost: ${this.calculateCost(partsForRole)})`);
       }
     }
   },

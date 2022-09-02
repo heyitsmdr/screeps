@@ -8,6 +8,11 @@
  */
 
 module.exports = {
+  BASIC: 'basic',
   HARVESTER: 'harvester',
-  UPGRADER: 'upgrader'
+  UPGRADER: 'upgrader',
+
+  BODY_PARTS: {
+    BASIC: [WORK, CARRY, MOVE]
+  }
 };

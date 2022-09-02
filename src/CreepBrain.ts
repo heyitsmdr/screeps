@@ -22,19 +22,6 @@ export class CreepBrain {
     // this._queue = Memory.workQueue;
   }
 
-  private _addWork(work: WORK_TYPES): void {
-    if (!Memory.workQueue) {
-      Memory.workQueue = [];
-    }
-
-    this._queue.push(work);
-
-    if (!_.isEqual(this._queue, Memory.workQueue)) {
-      console.log(`Work queue changed: ${this._queue}`);
-      Memory.workQueue = this._queue;
-    }
-  }
-
   private _harvest(creep: Creep): void {
     const sources = creep.room.find(FIND_SOURCES);
     const result = creep.harvest(sources[0]);
@@ -58,10 +45,19 @@ export class CreepBrain {
    */
   think() {
     // Lowest priority is always upgrade controller.
-    this._addWork(WORK_TYPES.UPGRADE_CONTROLLER);
+    this._queue.push(WORK_TYPES.UPGRADE_CONTROLLER);
 
     // Next, harvest until we can't anymore.
-    this._addWork(WORK_TYPES.HARVEST);
+    this._queue.push(WORK_TYPES.HARVEST);
+
+    if (!Memory.workQueue) {
+      Memory.workQueue = [];
+    }
+
+    if (!_.isEqual(this._queue, Memory.workQueue)) {
+      console.log(`Work queue changed: ${this._queue}`);
+      Memory.workQueue = this._queue;
+    }
   }
 
   /**

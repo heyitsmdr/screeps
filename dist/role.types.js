@@ -13,6 +13,6 @@ module.exports = {
   UPGRADER: 'upgrader',
 
   BODY_PARTS: {
-    BASIC: [WORK, CARRY, MOVE]
+    'basic': [WORK, CARRY, MOVE]
   }
 };

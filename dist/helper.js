@@ -15,8 +15,8 @@ module.exports = {
 
   ensureCreepMinimum: function (role, minCreeps) {
     const partsForRole = roleTypes.BODY_PARTS[role];
-    const creepsOfType = _.filter(Game.creeps, (creep) => creep.memory.role === role);
-    if (creepsOfType.length < minCreeps) {
+    const roleCreeps = _.filter(Game.creeps, (creep) => creep.memory.role === role);
+    if (roleCreeps.length < minCreeps) {
       const creepName = role.substr(0, 1).toUpperCase() + role.substr(1) + Game.time;
       const spawnResult = Game.spawns['MainSpawn'].spawnCreep(
         partsForRole,

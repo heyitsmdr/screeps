@@ -11,6 +11,8 @@ const MOVE_COLORS = {
   UPGRADE: '#00ff00'
 };
 
+const ENERGY_STRUCTURE_TYPES = [STRUCTURE_SPAWN, STRUCTURE_EXTENSION];
+
 module.exports = {
   /**
    * 
@@ -20,7 +22,9 @@ module.exports = {
   structuresNeedingEnergy: function(room) {
     const structures = room.find(FIND_STRUCTURES, {
       filter: (structure) => {
-        return structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+        structure.store
+        return (ENERGY_STRUCTURE_TYPES.indexOf(structure.structureType) > -1) &&
+          structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
       }
     });
 

@@ -21,10 +21,6 @@ declare global {
     // room: string;
     // working: boolean;
   }
-
-  enum ROLE_TYPES {
-    BASIC = "basic"
-  }
 }
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change

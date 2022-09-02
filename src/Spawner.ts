@@ -1,4 +1,4 @@
-import { GetBodyParts } from "utils/BodyParts";
+import { ROLE_TYPES, GetBodyParts } from "utils/Roles";
 
 export class Spawner {
   private _getDesiredForRole(roleType: ROLE_TYPES): number {
@@ -14,8 +14,10 @@ export class Spawner {
   }
 
   spawn() {
+
     // Just use the basic role for now.
     const role = ROLE_TYPES.BASIC;
+
 
     // Get the parts that we'll use for the role.
     const parts = GetBodyParts(role);

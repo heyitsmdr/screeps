@@ -5,7 +5,7 @@ const MOVE_COLORS = {
 };
 
 export enum WORK_TYPES {
-  HARVEST
+  HARVEST = "harvest"
 }
 
 export class CreepBrain {
@@ -34,12 +34,12 @@ export class CreepBrain {
       Memory.workQueue = [];
     }
 
+    this._queue.push(work);
+
     if (!_.isEqual(this._queue, Memory.workQueue)) {
       console.log(`Work queue changed: ${this._queue}`);
       Memory.workQueue = this._queue;
     }
-
-    this._queue.push(work);
   }
 
   /**

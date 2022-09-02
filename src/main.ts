@@ -32,6 +32,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
   for (const name in Memory.creeps) {
     if (!(name in Game.creeps)) {
       delete Memory.creeps[name];
+      console.log(`Cleared vacant creep memory for: ${name}`);
     }
   }
 

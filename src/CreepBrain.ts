@@ -68,15 +68,13 @@ export class CreepBrain {
     let action =  creep.memory.currentTask;
 
     if (!action) {
-      action = this._queue[this._queue.length - 1];
-      if (action == WORK_TYPES.HARVEST && creep.store.getFreeCapacity() == 0) {
-        if (this._queue.length == 1) {
-          console.log(`Uh oh! Creep ${creep.name} has nothing to do!`);
-          return;
+      const filteredQueue = _.filter(this._queue, item => {
+        if (item == WORK_TYPES.HARVEST && creep.store.getFreeCapacity() == 0) {
+          return false;
         }
-
-        action = this._queue[this._queue.length - 2];
-      }
+        return true;
+      });
+      action = filteredQueue[filteredQueue.length - 1];
     }
 
     if (creep.memory.currentTask != action) {

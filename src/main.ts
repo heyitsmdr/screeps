@@ -19,7 +19,8 @@ declare global {
   }
 
   interface CreepMemory {
-    role: string;
+    role?: string;
+    currentTask?: string;
     // room: string;
     // working: boolean;
   }

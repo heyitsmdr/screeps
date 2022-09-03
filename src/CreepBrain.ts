@@ -1,7 +1,7 @@
 const MOVE_COLORS = {
-  HARVEST:  '#aaaaaa',
+  HARVEST: '#aaaaaa',
   TRANSFER: '#ffff00',
-  UPGRADE:  '#00ff00'
+  UPGRADE: '#00ff00'
 };
 
 export enum WORK_TYPES {
@@ -41,7 +41,7 @@ export class CreepBrain {
 
   /**
    * Generates a queue of activities that need to be done, ordered
-   * from smaller to highest priority.
+   * from smallest to highest priority.
    */
   think() {
     // Lowest priority is always upgrade controller.
@@ -65,23 +65,39 @@ export class CreepBrain {
    * @param creep Creep to perform the work.
    */
   work(creep: Creep): void {
-    let nextWork = this._queue[this._queue.length - 1];
+    let action =  creep.memory.currentTask;
 
-    if (nextWork == WORK_TYPES.HARVEST && creep.store.getFreeCapacity() == 0) {
-      if (this._queue.length == 1) {
-        console.log(`Uh oh! Creep ${creep.name} has nothing to do!`);
-        return;
+    if (!action) {
+      action = this._queue[this._queue.length - 1];
+      if (action == WORK_TYPES.HARVEST && creep.store.getFreeCapacity() == 0) {
+        if (this._queue.length == 1) {
+          console.log(`Uh oh! Creep ${creep.name} has nothing to do!`);
+          return;
+        }
+
+        action = this._queue[this._queue.length - 2];
       }
-
-      nextWork = this._queue[this._queue.length - 2];
     }
 
-    if (nextWork == WORK_TYPES.HARVEST) {
-      return this._harvest(creep);
+    if (creep.memory.currentTask != action) {
+      creep.memory.currentTask = action;
+      console.log(`Creep ${creep.name} has been assigned the task: ${action}`);
     }
 
-    if (nextWork == WORK_TYPES.UPGRADE_CONTROLLER) {
-      return this._upgradeController(creep);
+    if (action == WORK_TYPES.HARVEST) {
+      this._harvest(creep);
+      if (creep.store.getFreeCapacity() == 0) {
+        delete creep.memory.currentTask;
+      }
+      return;
+    }
+
+    if (action == WORK_TYPES.UPGRADE_CONTROLLER) {
+      this._upgradeController(creep);
+      if (creep.store.getUsedCapacity() == 0) {
+        delete creep.memory.currentTask;
+      }
+      return;
     }
   }
 }

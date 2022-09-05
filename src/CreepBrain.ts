@@ -96,7 +96,7 @@ export class CreepBrain {
           return false;
         // Ignore site building action if site building would not be possible.
         } else if (baseAction[0] == WORK_TYPES.BUILD_SITE) {
-          const constSite = Game.getObjectById(actionSections[1] as Id<ConstructionSite>);
+          const constSite = Game.getObjectById(baseAction[1] as Id<ConstructionSite>);
           if (!constSite || constSite.room?.name != creep.room.name || creep.store.getUsedCapacity() == 0) {
             return false;
           }

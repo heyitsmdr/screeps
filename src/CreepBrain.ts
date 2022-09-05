@@ -41,11 +41,7 @@ export class CreepBrain {
     }
   }
 
-  private _buildSite(creep: Creep, siteId: Id<ConstructionSite>): void {
-    const site = Game.getObjectById(siteId)
-    if (!site || !creep.room.controller) {
-      return;
-    }
+  private _buildSite(creep: Creep, site: ConstructionSite): void {
     const result = creep.build(site)
     if (result == ERR_NOT_IN_RANGE) {
       creep.moveTo(site, { visualizePathStyle: { stroke: MOVE_COLORS.BUILD } });
@@ -69,7 +65,7 @@ export class CreepBrain {
       const roomConstructionSites = room.find(FIND_CONSTRUCTION_SITES);
       roomConstructionSites.forEach(site => {
         this._queue.push(
-          `${WORK_TYPES.BUILD_SITE}:${room.name}:${site.id}`
+          `${WORK_TYPES.BUILD_SITE}:${site.id}`
         );
       });
     }
@@ -132,7 +128,13 @@ export class CreepBrain {
     }
 
     if (actionSections[0] == WORK_TYPES.BUILD_SITE) {
-      this._buildSite(creep, (actionSections[2] as Id<ConstructionSite>));
+      const constSite = Game.getObjectById(actionSections[1] as Id<ConstructionSite>);
+      if (!constSite) {
+        delete creep.memory.currentTask;
+        return;
+      }
+
+      this._buildSite(creep, constSite);
       if (creep.store.getUsedCapacity() == 0) {
         delete creep.memory.currentTask;
       }

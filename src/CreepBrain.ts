@@ -1,16 +1,18 @@
 const MOVE_COLORS = {
   HARVEST: '#aaaaaa',
   TRANSFER: '#ffff00',
-  UPGRADE: '#00ff00'
+  UPGRADE: '#00ff00',
+  BUILD: '#0000ff'
 };
 
 export enum WORK_TYPES {
   HARVEST = "harvest",
-  UPGRADE_CONTROLLER = "upgradeController"
+  UPGRADE_CONTROLLER = "upgradeController",
+  BUILD_SITE = "buildSite"
 }
 
 export class CreepBrain {
-  private _queue: Array<WORK_TYPES> = [];
+  private _queue: Array<string> = [];
 
   constructor() {
     // TODO: Load anything persistent from game memory.
@@ -39,6 +41,17 @@ export class CreepBrain {
     }
   }
 
+  private _buildSite(creep: Creep, siteId: Id<ConstructionSite>): void {
+    const site = Game.getObjectById(siteId)
+    if (!site || !creep.room.controller) {
+      return;
+    }
+    const result = creep.build(site)
+    if (result == ERR_NOT_IN_RANGE) {
+      creep.moveTo(creep.room.controller, { visualizePathStyle: { stroke: MOVE_COLORS.BUILD } });
+    }
+  }
+
   /**
    * Generates a queue of activities that need to be done, ordered
    * from smallest to highest priority.
@@ -50,6 +63,16 @@ export class CreepBrain {
     // Next, harvest until we can't anymore.
     this._queue.push(WORK_TYPES.HARVEST);
 
+    // Next, add constructions sites if there are any.
+    for (const roomName in Game.rooms) {
+      const room = Game.rooms[roomName];
+      const roomConstructionSites = room.find(FIND_CONSTRUCTION_SITES);
+      roomConstructionSites.forEach(site => {
+        this._queue.push(
+          `${WORK_TYPES.BUILD_SITE}:${room.name}:${site.id}`
+        );
+      });
+    }
     if (!Memory.workQueue) {
       Memory.workQueue = [];
     }
@@ -69,7 +92,15 @@ export class CreepBrain {
 
     if (!action) {
       const filteredQueue = _.filter(this._queue, item => {
-        if (item == WORK_TYPES.HARVEST && creep.store.getFreeCapacity() == 0) {
+        const baseAction = item.split(':');
+        // Stop harvesting if there is no more storage room.
+        if (baseAction[0] == WORK_TYPES.HARVEST && creep.store.getFreeCapacity() == 0) {
+          return false;
+        // Ignore site building action if in a different room.
+        } else if (baseAction[0] == WORK_TYPES.BUILD_SITE && baseAction[1] != creep.room.name) {
+          return false;
+        // Stop building a construction site if there is no more energy being carried.
+        } else if (baseAction[0] == WORK_TYPES.BUILD_SITE && creep.store.getUsedCapacity() == 0) {
           return false;
         }
         return true;
@@ -77,12 +108,14 @@ export class CreepBrain {
       action = filteredQueue[filteredQueue.length - 1];
     }
 
+    const actionSections = action.split(':');
+
     if (creep.memory.currentTask != action) {
       creep.memory.currentTask = action;
       console.log(`Creep ${creep.name} has been assigned the task: ${action}`);
     }
 
-    if (action == WORK_TYPES.HARVEST) {
+    if (actionSections[0] == WORK_TYPES.HARVEST) {
       this._harvest(creep);
       if (creep.store.getFreeCapacity() == 0) {
         delete creep.memory.currentTask;
@@ -90,8 +123,16 @@ export class CreepBrain {
       return;
     }
 
-    if (action == WORK_TYPES.UPGRADE_CONTROLLER) {
+    if (actionSections[0] == WORK_TYPES.UPGRADE_CONTROLLER) {
       this._upgradeController(creep);
+      if (creep.store.getUsedCapacity() == 0) {
+        delete creep.memory.currentTask;
+      }
+      return;
+    }
+
+    if (actionSections[0] == WORK_TYPES.BUILD_SITE) {
+      this._buildSite(creep, (actionSections[2] as Id<ConstructionSite>));
       if (creep.store.getUsedCapacity() == 0) {
         delete creep.memory.currentTask;
       }

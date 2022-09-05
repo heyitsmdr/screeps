@@ -25,6 +25,6 @@ export class Builder {
   }
 
   build(): void {
-    this._buildExtensions();
+    //this._buildExtensions();
   }
 }

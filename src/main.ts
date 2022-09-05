@@ -16,7 +16,7 @@ declare global {
   interface Memory {
     uuid: number;
     log: any;
-    workQueue: Array<WORK_TYPES>;
+    workQueue: Array<string>;
   }
 
   interface CreepMemory {

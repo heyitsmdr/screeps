@@ -48,7 +48,7 @@ export class CreepBrain {
     }
     const result = creep.build(site)
     if (result == ERR_NOT_IN_RANGE) {
-      creep.moveTo(creep.room.controller, { visualizePathStyle: { stroke: MOVE_COLORS.BUILD } });
+      creep.moveTo(site, { visualizePathStyle: { stroke: MOVE_COLORS.BUILD } });
     }
   }
 

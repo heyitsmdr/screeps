@@ -13,11 +13,13 @@ export class Spawner {
     return _.sum(parts, p => BODYPART_COST[p]);
   }
 
-  spawn() {
+  private _determineSpawnRole(): ROLE_TYPES {
+    return ROLE_TYPES.BASIC;
+  }
 
+  spawn(): void {
     // Just use the basic role for now.
-    const role = ROLE_TYPES.BASIC;
-
+    const role = this._determineSpawnRole();
 
     // Get the parts that we'll use for the role.
     const parts = GetBodyParts(role);

@@ -12,7 +12,6 @@ export class Builder {
     }
 
     const maxExtensions = CONTROLLER_STRUCTURES[STRUCTURE_EXTENSION][roomControllerLevel];
-    console.log(`Room ${this._room.name} can have ${maxExtensions} extensions`);
 
     const extensionConstructionSites = this._room.find(FIND_CONSTRUCTION_SITES, {
       filter: (constructionSite) => constructionSite.structureType == STRUCTURE_EXTENSION
@@ -21,8 +20,8 @@ export class Builder {
       filter: (constructionSite) => constructionSite.structureType == STRUCTURE_EXTENSION
     });
 
-    console.log(`There are ${extensionConstructionSites.length} extension build sites.`);
-    console.log(`There are ${builtExtensions.length} extensions available.`);
+    const total = extensionConstructionSites.length + builtExtensions.length;
+    console.log(`Room ${this._room.name} has ${total}/${maxExtensions} extensions`);
   }
 
   build(): void {

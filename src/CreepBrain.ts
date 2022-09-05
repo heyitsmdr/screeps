@@ -1,3 +1,5 @@
+import { repeat } from "lodash";
+
 const MOVE_COLORS = {
   HARVEST: '#aaaaaa',
   TRANSFER: '#ffff00',
@@ -92,13 +94,14 @@ export class CreepBrain {
         // Stop harvesting if there is no more storage room.
         if (baseAction[0] == WORK_TYPES.HARVEST && creep.store.getFreeCapacity() == 0) {
           return false;
-        // Ignore site building action if in a different room.
-        } else if (baseAction[0] == WORK_TYPES.BUILD_SITE && baseAction[1] != creep.room.name) {
-          return false;
-        // Stop building a construction site if there is no more energy being carried.
-        } else if (baseAction[0] == WORK_TYPES.BUILD_SITE && creep.store.getUsedCapacity() == 0) {
-          return false;
+        // Ignore site building action if site building would not be possible.
+        } else if (baseAction[0] == WORK_TYPES.BUILD_SITE) {
+          const constSite = Game.getObjectById(actionSections[1] as Id<ConstructionSite>);
+          if (!constSite || constSite.room?.name != creep.room.name || creep.store.getUsedCapacity() == 0) {
+            return false;
+          }
         }
+
         return true;
       });
       action = filteredQueue[filteredQueue.length - 1];

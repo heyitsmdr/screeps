@@ -12,6 +12,8 @@ const ENERGIZED_STRUCTURES = [
   STRUCTURE_EXTENSION,
 ];
 
+export type RoomWork = { [room: string]: Array<string> };
+
 export enum WORK_TYPES {
   HARVEST = "harvest",
   UPGRADE_CONTROLLER = "upgradeController",
@@ -20,7 +22,7 @@ export enum WORK_TYPES {
 }
 
 export class CreepBrain {
-  private _queue: Array<string> = [];
+  private _queue:RoomWork = {};
 
   constructor() {
     // TODO: Load anything persistent from game memory.
@@ -77,38 +79,42 @@ export class CreepBrain {
    *  - Transfer energy to structures that need energy.
    *  - Build construction zones.
    */
-  think() {
-    // Lowest priority is always upgrade controller.
-    this._queue.push(WORK_TYPES.UPGRADE_CONTROLLER);
-
-    // Next, harvest until we can't anymore.
-    this._queue.push(WORK_TYPES.HARVEST);
-
-    // Now go through the rooms to find work.
-    for (const roomName in Game.rooms) {
-      const room = Game.rooms[roomName];
-
-      // Add structures that need energy.
-      const nonEnergizedStructures = room.find(FIND_STRUCTURES, {
-        filter: (structure) => {
-          if (structure.structureType == STRUCTURE_EXTENSION && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-            return true;
-          } else if (structure.structureType == STRUCTURE_SPAWN && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-            return true;
-          }
-
-          return false;
-        }
-      });
-      nonEnergizedStructures.forEach(struct => this._queue.push(`${WORK_TYPES.TRANSFER_ENERGY}:${struct.id}`));
-
-      // Add constructions sites if there are any.
-      const roomConstructionSites = room.find(FIND_CONSTRUCTION_SITES);
-      roomConstructionSites.forEach(site => this._queue.push(`${WORK_TYPES.BUILD_SITE}:${site.id}`));
+  think(room: Room) {
+    if (!room.name) {
+      console.log(`ERROR! Unable to think about room with no name.`);
+      return;
     }
 
+    if (!this._queue[room.name]) {
+      this._queue[room.name] = [];
+    }
+
+    // Lowest priority is always upgrade controller.
+    this._queue[room.name].push(WORK_TYPES.UPGRADE_CONTROLLER);
+
+    // Next, harvest until we can't anymore.
+    this._queue[room.name].push(WORK_TYPES.HARVEST);
+
+    // Add structures that need energy.
+    const nonEnergizedStructures = room.find(FIND_STRUCTURES, {
+      filter: (structure) => {
+        if (structure.structureType == STRUCTURE_EXTENSION && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+          return true;
+        } else if (structure.structureType == STRUCTURE_SPAWN && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+          return true;
+        }
+
+        return false;
+      }
+    });
+    nonEnergizedStructures.forEach(struct => this._queue[room.name].push(`${WORK_TYPES.TRANSFER_ENERGY}:${struct.id}`));
+
+    // Add constructions sites if there are any.
+    const roomConstructionSites = room.find(FIND_CONSTRUCTION_SITES);
+    roomConstructionSites.forEach(site => this._queue[room.name].push(`${WORK_TYPES.BUILD_SITE}:${site.id}`));
+
     if (!Memory.workQueue) {
-      Memory.workQueue = [];
+      Memory.workQueue = {};
     }
 
     if (!_.isEqual(this._queue, Memory.workQueue)) {
@@ -127,14 +133,14 @@ export class CreepBrain {
     // Ignore site building action if site building would not be possible.
     } else if (baseAction[0] == WORK_TYPES.BUILD_SITE) {
       const constSite = Game.getObjectById(baseAction[1] as Id<ConstructionSite>);
-      if (!constSite || constSite.room?.name != creep.room.name || creep.store.getUsedCapacity() == 0) {
+      if (!constSite || creep.store.getUsedCapacity() == 0) {
         return false;
       }
 
     // Ignore transfer energy if transferring would not be possible.
     } else if (baseAction[0] == WORK_TYPES.TRANSFER_ENERGY) {
       const struct = Game.getObjectById(baseAction[1] as Id<Structure>);
-      if (!struct || struct.room?.name != creep.room.name || creep.store.getUsedCapacity() == 0) {
+      if (!struct || creep.store.getUsedCapacity() == 0) {
         return false;
       }
     }
@@ -148,14 +154,15 @@ export class CreepBrain {
    */
   work(creep: Creep): void {
     let action =  creep.memory.currentTask;
+    let queue = this._queue[creep.room.name];
 
     // Stop the action if the brain no longer requires the action to be done.
-    if (action && this._queue.indexOf(action) == -1) {
+    if (action && queue.indexOf(action) == -1) {
       action = undefined;
     }
 
     if (!action) {
-      const filteredQueue = _.filter(this._queue, item => this._filterCreepQueueItem(creep, item));
+      const filteredQueue = _.filter(queue, queueItem => this._filterCreepQueueItem(creep, queueItem));
       action = filteredQueue[filteredQueue.length - 1];
     }
 
@@ -163,7 +170,7 @@ export class CreepBrain {
 
     if (creep.memory.currentTask != action) {
       creep.memory.currentTask = action;
-      console.log(`Creep ${creep.name} has been assigned the task: ${action}`);
+      console.log(`Brain assigned ${creep.name} to the task: ${action}`);
     }
 
     if (actionSections[0] == WORK_TYPES.HARVEST) {

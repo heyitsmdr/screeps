@@ -1,5 +1,4 @@
-import { Builder } from "Builder";
-import { CreepBrain, WORK_TYPES } from "CreepBrain";
+import { CreepBrain, RoomWork } from "CreepBrain";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { Spawner } from './Spawner';
 
@@ -16,7 +15,7 @@ declare global {
   interface Memory {
     uuid: number;
     log: any;
-    workQueue: Array<string>;
+    workQueue: RoomWork;
   }
 
   interface CreepMemory {
@@ -46,13 +45,9 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
   // Calculate work that needs to be done for each room.
   const creepBrain = new CreepBrain();
-  creepBrain.think();
-
-  // Room building management.
   for (const name in Game.rooms) {
     const room = Game.rooms[name];
-    const builder = new Builder(room);
-    builder.build();
+    creepBrain.think(room);
   }
 
   // Tell the creeps to do work.

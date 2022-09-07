@@ -102,6 +102,8 @@ export class CreepBrain {
           return true;
         } else if (structure.structureType == STRUCTURE_SPAWN && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
           return true;
+        } else if (structure.structureType == STRUCTURE_TOWER && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+          return true;
         }
 
         return false;

@@ -2,7 +2,7 @@ import { ROLE_TYPES, GetBodyParts } from "utils/Roles";
 
 export class Spawner {
   private _getDesiredForRole(roleType: ROLE_TYPES): number {
-    return 5;
+    return 10;
   }
 
   private _creepName(roleType: ROLE_TYPES): string {

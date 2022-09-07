@@ -56,6 +56,17 @@ export class CreepBrain {
     }
   }
 
+  private _transferEnergy(creep: Creep, struct: Structure): void {
+    const result = creep.transfer(struct, RESOURCE_ENERGY);
+    if (result == ERR_NOT_IN_RANGE) {
+      creep.moveTo(struct, {
+        visualizePathStyle: {
+          stroke: MOVE_COLORS.UPGRADE
+        }
+      });
+    }
+  }
+
   /**
    * Generates a queue of activities that need to be done, ordered
    * from smallest to highest priority.
@@ -171,9 +182,29 @@ export class CreepBrain {
       }
 
       this._buildSite(creep, constSite);
+
+      // If no more energy, let's get a new task from the brain.
       if (creep.store.getUsedCapacity() == 0) {
         delete creep.memory.currentTask;
       }
+
+      return;
+    }
+
+    if (actionSections[0] == WORK_TYPES.TRANSFER_ENERGY) {
+      const struct = Game.getObjectById(actionSections[1] as Id<Structure>);
+      if (!struct) {
+        delete creep.memory.currentTask;
+        return;
+      }
+
+      this._transferEnergy(creep, struct);
+
+      // If no more energy, let's get a new task from the brain.
+      if (creep.store.getUsedCapacity() == 0) {
+        delete creep.memory.currentTask;
+      }
+
       return;
     }
   }

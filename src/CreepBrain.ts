@@ -120,7 +120,7 @@ export class CreepBrain {
     }
 
     if (!_.isEqual(this._queue, Memory.workQueue)) {
-      console.log(`Work queue changed: ${JSON.stringify(this._queue)}`);
+      console.log(`Work queue changed: ${JSON.stringify(this._queue, null, 2)}`);
       Memory.workQueue = this._queue;
     }
   }

@@ -117,6 +117,31 @@ export class CreepBrain {
     }
   }
 
+  _filterCreepQueueItem(creep: Creep, action: string): boolean {
+    const baseAction = action.split(':');
+
+    // Stop harvesting if there is no more storage room.
+    if (baseAction[0] == WORK_TYPES.HARVEST && creep.store.getFreeCapacity() == 0) {
+      return false;
+
+    // Ignore site building action if site building would not be possible.
+    } else if (baseAction[0] == WORK_TYPES.BUILD_SITE) {
+      const constSite = Game.getObjectById(baseAction[1] as Id<ConstructionSite>);
+      if (!constSite || constSite.room?.name != creep.room.name || creep.store.getUsedCapacity() == 0) {
+        return false;
+      }
+
+    // Ignore transfer energy if transferring would not be possible.
+    } else if (baseAction[0] == WORK_TYPES.TRANSFER_ENERGY) {
+      const struct = Game.getObjectById(baseAction[1] as Id<Structure>);
+      if (!struct || struct.room?.name != creep.room.name || creep.store.getUsedCapacity() == 0) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   /**
    * Assigns actions to a creep based on the work queue.
    * @param creep Creep to perform the work.
@@ -124,30 +149,13 @@ export class CreepBrain {
   work(creep: Creep): void {
     let action =  creep.memory.currentTask;
 
+    // Stop the action if the brain no longer requires the action to be done.
+    if (action && this._queue.indexOf(action) == -1) {
+      action = undefined;
+    }
+
     if (!action) {
-      const filteredQueue = _.filter(this._queue, item => {
-        const baseAction = item.split(':');
-        // Stop harvesting if there is no more storage room.
-        if (baseAction[0] == WORK_TYPES.HARVEST && creep.store.getFreeCapacity() == 0) {
-          return false;
-
-        // Ignore site building action if site building would not be possible.
-        } else if (baseAction[0] == WORK_TYPES.BUILD_SITE) {
-          const constSite = Game.getObjectById(baseAction[1] as Id<ConstructionSite>);
-          if (!constSite || constSite.room?.name != creep.room.name || creep.store.getUsedCapacity() == 0) {
-            return false;
-          }
-
-        // Ignore transfer energy if transferring would not be possible.
-        } else if (baseAction[0] == WORK_TYPES.TRANSFER_ENERGY) {
-          const struct = Game.getObjectById(baseAction[1] as Id<Structure>);
-          if (!struct || struct.room?.name != creep.room.name || creep.store.getUsedCapacity() == 0) {
-            return false;
-          }
-        }
-
-        return true;
-      });
+      const filteredQueue = _.filter(this._queue, item => this._filterCreepQueueItem(creep, item));
       action = filteredQueue[filteredQueue.length - 1];
     }
 

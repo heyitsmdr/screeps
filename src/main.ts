@@ -1,4 +1,5 @@
 import { CreepBrain, RoomWork } from "CreepBrain";
+import { Repairer } from "Repairer";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { Spawner } from './Spawner';
 
@@ -29,7 +30,9 @@ declare global {
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
-  //console.log(`Current game tick is ${Game.time}`);
+  const spawner = new Spawner();
+  const repairer = new Repairer();
+  const creepBrain = new CreepBrain();
 
   // Automatically delete memory of missing creeps.
   for (const name in Memory.creeps) {
@@ -40,14 +43,17 @@ export const loop = ErrorMapper.wrapLoop(() => {
   }
 
   // Creep spawning management.
-  const spawner = new Spawner();
   spawner.spawn();
 
   // Calculate work that needs to be done for each room.
-  const creepBrain = new CreepBrain();
   for (const name in Game.rooms) {
     const room = Game.rooms[name];
+
+    // Tell the brain to think, for the creep work.
     creepBrain.think(room);
+
+    // Tower repair management.
+    repairer.repair(room);
   }
 
   // Tell the creeps to do work.

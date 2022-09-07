@@ -22,7 +22,6 @@ jobs:
 
       - name: write screeps config
         env:
-          SCREEPS_EMAIL: ${{ secrets.SCREEPS_EMAIL }}
           SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
         run: |-
           echo "{
